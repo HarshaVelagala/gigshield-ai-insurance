@@ -29,3 +29,11 @@ AI: Python
 - AI risk prediction
 - Automatic claim trigger
 - Instant payout simulation
+
+- ## System Workflow
+
+1. Delivery worker registers on the platform.
+2. AI calculates weekly premium based on risk factors.
+3. System monitors external disruptions (weather, pollution).
+4. If disruption occurs, claim is triggered automatically.
+5. Worker receives instant payout.
