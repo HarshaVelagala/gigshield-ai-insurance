@@ -19,10 +19,13 @@ Food Delivery Workers (Swiggy/Zomato)
 Web application.
 
 ## Tech Stack
-Frontend: React
-Backend: Node.js
-Database: MongoDB
-AI: Python
+
+Frontend: React  
+Backend: Node.js  
+Database: MongoDB  
+AI/ML: Python (Scikit-learn)  
+APIs: OpenWeatherMap API  
+Payments: Razorpay Sandbox
 
 ## Features
 - Weekly insurance pricing
@@ -30,7 +33,7 @@ AI: Python
 - Automatic claim trigger
 - Instant payout simulation
 
-- ## System Workflow
+## System Workflow
 
 1. Delivery worker registers on the platform.
 2. AI calculates weekly premium based on risk factors.
