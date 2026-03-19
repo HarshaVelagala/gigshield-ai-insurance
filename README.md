@@ -44,10 +44,10 @@ Claims are triggered when predefined thresholds are met:
 These triggers eliminate manual claim filing and ensure instant payouts.
 
 🤖 AI/ML Integration
-GigShield AI integrates AI at multiple stages:
-Risk Prediction Model: Estimates probability of disruptions
-Dynamic Pricing Model: Adjusts weekly premium
-Fraud Detection Model: Identifies suspicious claim patterns
+-GigShield AI integrates AI at multiple stages:
+-Risk Prediction Model: Estimates probability of disruptions
+-Dynamic Pricing Model: Adjusts weekly premium
+-Fraud Detection Model: Identifies suspicious claim patterns
 
 🚨 Adversarial Defense & Anti-Spoofing Strategy
 To prevent large-scale fraud (e.g., GPS spoofing attacks), GigShield AI uses a multi-layered defense system:
