@@ -31,16 +31,16 @@ Historical weather data
 Worker activity patterns
 
 👉 Example:
-Low-risk zone → ₹15/week
-High-risk zone → ₹30/week
+- Low-risk zone → ₹15/week
+- High-risk zone → ₹30/week
 
 🌩️ Parametric Triggers (Automatic Claims)
 Claims are triggered when predefined thresholds are met:
 
-🌧️ Heavy Rainfall (e.g., > 50 mm/day)
-🌊 Flood Alerts in region
-🌫️ High Pollution (AQI > 300)
-🚫 Zone Inaccessibility (simulated)
+- 🌧️ Heavy Rainfall (e.g., > 50 mm/day)
+- 🌊 Flood Alerts in region
+- 🌫️ High Pollution (AQI > 300)
+- 🚫 Zone Inaccessibility (simulated)
 These triggers eliminate manual claim filing and ensure instant payouts.
 
 🤖 AI/ML Integration
@@ -63,44 +63,44 @@ Flags unrealistic delivery efficiency
 Detects repeated claim behavior
 
 🕸️ Fraud Ring Detection
-Detects clusters of accounts using:
-Same device fingerprint
-Same IP/VPN
-Synchronized activity
+- Detects clusters of accounts using:
+- Same device fingerprint
+- Same IP/VPN
+- Synchronized activity
 
 ⚖️ Risk Scoring System
-Each user is assigned a dynamic risk score:
-Low Risk → Normal operation
-Medium Risk → Additional verification
-High Risk → Claim review / payout restriction
+- Each user is assigned a dynamic risk score:
+- Low Risk → Normal operation
+- Medium Risk → Additional verification
+- High Risk → Claim review / payout restriction
 
 🧍 Protecting Genuine Users
-No penalties for single anomalies
-Multi-signal validation before flagging
-Appeal and manual review system
+- No penalties for single anomalies
+- Multi-signal validation before flagging
+- Appeal and manual review system
 
 👉 Core Principle:
 GigShield AI uses a probabilistic trust model, not a single data source like GPS, ensuring fairness while preventing fraud.
 
 🔄 System Workflow
-User registers on the platform
-AI calculates weekly premium
-System continuously monitors external conditions
-Disruption detected via APIs
-Claim triggered automatically
-Instant payout processed
+- User registers on the platform
+- AI calculates weekly premium
+- System continuously monitors external conditions
+- Disruption detected via APIs
+- Claim triggered automatically
+- Instant payout processed
 
 🛠️ Tech Stack
-Frontend: React
-Backend: Node.js
-Database: MongoDB
-AI/ML: Python (Scikit-learn)
-APIs: OpenWeatherMap API
-Payments: Razorpay Sandbox
+- Frontend: React
+- Backend: Node.js
+- Database: MongoDB
+- AI/ML: Python (Scikit-learn)
+- APIs: OpenWeatherMap API
+- Payments: Razorpay Sandbox
 
 🧪 Development Plan
-Phase 2: Build core platform (registration, pricing, claims)
-Phase 3: Advanced fraud detection, analytics dashboard, scaling
+- Phase 2: Build core platform (registration, pricing, claims)
+- Phase 3: Advanced fraud detection, analytics dashboard, scaling
 
 🎯 Vision
 To create a financial safety net for gig workers, ensuring they are protected against unpredictable environmental disruptions through automation, AI, and fair risk assessment.
