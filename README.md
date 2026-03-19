@@ -18,7 +18,9 @@ Highly affected by environmental disruptions
 
 ⚙️ Key Features
 📅 Weekly Insurance Pricing Model
+
 🤖 AI-Based Risk Prediction
+
 🌧️ Real-Time Disruption Monitoring
 ⚡ Automatic Claim Triggering
 💸 Instant Payout Simulation
