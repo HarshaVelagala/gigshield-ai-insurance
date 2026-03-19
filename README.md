@@ -12,18 +12,17 @@ Instead of manual claims, payouts are triggered instantly and automatically base
 
 👤 Target Persona
 
-Food Delivery Workers (Swiggy / Zomato)
-Urban gig workers dependent on daily earnings
-Highly affected by environmental disruptions
+- Food Delivery Workers (Swiggy / Zomato)
+- Urban gig workers dependent on daily earnings
+- Highly affected by environmental disruptions
 
 ⚙️ Key Features
 
-📅 Weekly Insurance Pricing Model
-🤖 AI-Based Risk Prediction
-🌧️ Real-Time Disruption Monitoring
-⚡ Automatic Claim Triggering
-💸 Instant Payout Simulation
-💰 Weekly Premium Model
+- 📅 Weekly Insurance Pricing Model
+- 🤖 AI-Based Risk Prediction
+- 🌧️ Real-Time Disruption Monitoring
+- ⚡ Automatic Claim Triggering
+- 💸 Instant Payout (simulated via Razorpay sandbox)
 
 GigShield AI follows a weekly pricing strategy aligned with gig workers’ earning cycles.
 Premium is dynamically calculated using:
