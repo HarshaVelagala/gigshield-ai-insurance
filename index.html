@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GigShield AI — Parametric Insurance</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    /* ── Tailwind config ── */
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            navy: {
+              950: '#020817', 900: '#0a0f1e', 800: '#0f172a',
+              700: '#131d35', 600: '#1a2744',
+            },
+            glass: { DEFAULT: 'rgba(255,255,255,0.05)' },
+          },
+          backdropBlur: { xs: '2px' },
+          animation: {
+            'fade-up':      'fadeUp 0.5s ease both',
+            'fade-in':      'fadeIn 0.4s ease both',
+            'pulse-slow':   'pulse 3s ease-in-out infinite',
+            'spin-slow':    'spin 1.2s linear infinite',
+            'bounce-once':  'bounceOnce 0.6s ease both',
+            'shimmer':      'shimmer 2s linear infinite',
+          },
+          keyframes: {
+            fadeUp:     { from: { opacity: 0, transform: 'translateY(18px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+            fadeIn:     { from: { opacity: 0 }, to: { opacity: 1 } },
+            bounceOnce: { '0%': { transform: 'scale(0.7)', opacity: 0 }, '60%': { transform: 'scale(1.08)' }, '100%': { transform: 'scale(1)', opacity: 1 } },
+            shimmer:    { '0%': { backgroundPosition: '-200% center' }, '100%': { backgroundPosition: '200% center' } },
+          },
+          boxShadow: {
+            glass:  '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+            glow:   '0 0 24px rgba(59,130,246,0.25)',
+            'glow-green': '0 0 24px rgba(34,197,94,0.3)',
+            'glow-cyan':  '0 0 24px rgba(6,182,212,0.3)',
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ── Base ── */
+    * { box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Animated background ── */
+    .bg-grid {
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .bg-orb {
+      position: fixed; border-radius: 50%; filter: blur(100px);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Glass card ── */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover { border-color: rgba(99,179,237,0.2); }
+
+    /* ── Input ── */
+    .gs-input {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #f1f5f9;
+      transition: all 0.25s ease;
+    }
+    .gs-input::placeholder { color: #475569; }
+    .gs-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: rgba(59,130,246,0.08);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .gs-select { -webkit-appearance: none; cursor: pointer; }
+    .gs-select option { background: #1e293b; color: #f1f5f9; }
+
+    /* ── Shimmer text ── */
+    .shimmer-text {
+      background: linear-gradient(90deg, #60a5fa, #a78bfa, #60a5fa);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+    }
+
+    /* ── Disruption btn ripple ── */
+    .disruption-btn { position: relative; overflow: hidden; }
+    .disruption-btn::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.25) 0%, transparent 70%);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .disruption-btn:hover:not(:disabled)::after { opacity: 1; }
+    .disruption-btn:active:not(:disabled) { transform: scale(0.96); }
+
+    /* ── Timeline ── */
+    .timeline-line {
+      position: absolute; left: 5px; top: 14px; bottom: 0;
+      width: 1px; background: rgba(255,255,255,0.1);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    /* ── Stagger animations ── */
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.12s; }
+    .stagger-3 { animation-delay: 0.19s; }
+    .stagger-4 { animation-delay: 0.26s; }
+    .stagger-5 { animation-delay: 0.33s; }
+
+    /* ── Tooltip ── */
+    .tooltip-wrap:hover .tooltip-tip { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .tooltip-tip { opacity: 0; pointer-events: none; transform: translateY(4px); transition: all 0.2s ease; }
+
+    /* ── Loader dots ── */
+    .dot-loader span { animation: dotBounce 1.2s ease-in-out infinite; display: inline-block; }
+    .dot-loader span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-loader span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotBounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+  </style>
+</head>
+
+<body class="bg-navy-950 text-slate-100 min-h-screen antialiased bg-grid">
+
+  <!-- ── Ambient Orbs ── -->
+  <div class="bg-orb w-[600px] h-[600px] bg-blue-600/10 top-[-200px] left-[-200px]"></div>
+  <div class="bg-orb w-[500px] h-[500px] bg-indigo-600/10 bottom-[-150px] right-[-150px]"></div>
+  <div class="bg-orb w-[300px] h-[300px] bg-cyan-500/8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+
+  <!-- ════════════════════════════════════
+       HEADER
+  ════════════════════════════════════ -->
+  <header class="relative z-10 border-b border-white/[0.06] bg-navy-950/80 backdrop-blur-xl sticky top-0">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-glow text-sm">🛡️</div>
+        <span class="font-bold text-lg tracking-tight">
+          GigShield <span class="shimmer-text">AI</span>
+        </span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="hidden sm:flex items-center gap-1">
+        <a href="#" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-white/[0.07] text-white">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all duration-200">Claims</a>
+        <a href="#" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all duration-200">History</a>
+      </nav>
+
+      <!-- Status pill -->
+      <div id="navPill" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] text-xs text-slate-400 font-medium transition-all duration-500">
+        <span id="navDot" class="w-1.5 h-1.5 rounded-full bg-slate-600 transition-all duration-500"></span>
+        <span id="navLabel">Inactive</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════
+       MAIN DASHBOARD
+  ════════════════════════════════════ -->
+  <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+    <!-- ── ROW 1: Hero + Premium ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+      <!-- HERO CARD -->
+      <div class="lg:col-span-3 glass-card rounded-2xl p-7 animate-fade-up">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="text-xs font-semibold tracking-widest uppercase text-blue-400">Parametric Insurance · Auto-Claim</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.1] mb-4">
+          Protect Every<br />
+          <span class="shimmer-text">Delivery Shift.</span>
+        </h1>
+        <p class="text-slate-400 text-sm leading-relaxed max-w-md mb-7">
+          GigShield AI monitors real-time weather &amp; air quality to automatically trigger
+          payouts the moment disruptions hit — zero forms, zero waiting.
+        </p>
+        <!-- Stats row -->
+        <div class="flex items-center gap-6 flex-wrap">
+          <div>
+            <div class="text-2xl font-extrabold text-white">2.4s</div>
+            <div class="text-[11px] text-slate-500 uppercase tracking-wider mt-0.5">Avg. Payout</div>
+          </div>
+          <div class="w-px h-9 bg-white/10"></div>
+          <div>
+            <div class="text-2xl font-extrabold text-white">₹500</div>
+            <div class="text-[11px] text-slate-500 uppercase tracking-wider mt-0.5">Per Event</div>
+          </div>
+          <div class="w-px h-9 bg-white/10"></div>
+          <div>
+            <div class="text-2xl font-extrabold text-white">100%</div>
+            <div class="text-[11px] text-slate-500 uppercase tracking-wider mt-0.5">Automated</div>
+          </div>
+          <div class="w-px h-9 bg-white/10 hidden sm:block"></div>
+          <div class="hidden sm:block">
+            <div class="text-2xl font-extrabold text-white">5 Cities</div>
+            <div class="text-[11px] text-slate-500 uppercase tracking-wider mt-0.5">Covered</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREMIUM CARD -->
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6 flex flex-col animate-fade-up stagger-1"
+           style="background: linear-gradient(160deg, rgba(15,23,42,0.8) 0%, rgba(26,16,64,0.75) 100%);">
+        <div class="text-xs font-semibold tracking-widest uppercase text-blue-400 mb-4">Weekly Premium</div>
+
+        <div class="flex items-start gap-1 mb-1">
+          <span class="text-blue-400 font-bold text-2xl mt-2">₹</span>
+          <span id="premiumNum" class="text-6xl font-extrabold text-white leading-none transition-all duration-500">--</span>
+        </div>
+        <div class="text-xs text-slate-500 mb-6">₹20 – ₹30 / week · Dynamic pricing</div>
+
+        <!-- Features -->
+        <ul class="space-y-2.5 mb-6">
+          <li class="flex items-center gap-2.5 text-sm text-slate-300">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-[10px] flex-shrink-0">✓</span>
+            Rain &amp; Flood Coverage
+          </li>
+          <li class="flex items-center gap-2.5 text-sm text-slate-300">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-[10px] flex-shrink-0">✓</span>
+            High AQI Protection
+          </li>
+          <li class="flex items-center gap-2.5 text-sm text-slate-300">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-[10px] flex-shrink-0">✓</span>
+            Instant Auto-Payout
+          </li>
+          <li class="flex items-center gap-2.5 text-sm text-slate-300">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-[10px] flex-shrink-0">✓</span>
+            Zero Paperwork
+          </li>
+        </ul>
+
+        <!-- Status badge -->
+        <div id="premiumBadge"
+             class="mt-auto rounded-xl px-4 py-3 text-center text-xs font-semibold bg-white/[0.04] border border-white/[0.07] text-slate-500 transition-all duration-500">
+          Awaiting Activation
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROW 2: Activation + Disruption + Claim ── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+
+      <!-- ── ACTIVATION CARD ── -->
+      <div class="glass-card rounded-2xl p-6 animate-fade-up stagger-2">
+        <div class="text-xs font-semibold tracking-widest uppercase text-blue-400 mb-1">Delivery Partner</div>
+        <h2 class="text-lg font-bold mb-5">Activate Coverage</h2>
+
+        <!-- Name input -->
+        <div class="mb-4">
+          <label class="block text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-2">Your Name</label>
+          <input id="partnerName" type="text" placeholder="e.g. Ravi Kumar"
+                 class="gs-input w-full rounded-xl px-4 py-3 text-sm font-medium" autocomplete="off" />
+        </div>
+
+        <!-- City select -->
+        <div class="mb-5">
+          <label class="block text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-2">City</label>
+          <div class="relative">
+            <select id="citySelect"
+                    class="gs-input gs-select w-full rounded-xl px-4 py-3 text-sm font-medium pr-10">
+              <option value="">Select city…</option>
+              <option value="Hyderabad">Hyderabad</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Bangalore">Bangalore</option>
+              <option value="Chennai">Chennai</option>
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Activate button -->
+        <button id="activateBtn" onclick="activateInsurance()"
+                class="w-full rounded-xl py-3.5 text-sm font-bold tracking-wide
+                       bg-gradient-to-r from-blue-600 to-indigo-600
+                       hover:from-blue-500 hover:to-indigo-500
+                       hover:shadow-glow hover:-translate-y-0.5
+                       active:translate-y-0 active:scale-[0.98]
+                       disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
+                       transition-all duration-200 flex items-center justify-center gap-2.5">
+          <span id="btnContent" class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            Activate Insurance
+          </span>
+        </button>
+
+        <!-- Note -->
+        <p id="activationNote" class="mt-3 text-[11px] text-center text-slate-600 min-h-[1.2em] transition-all duration-300"></p>
+      </div>
+
+      <!-- ── DISRUPTION PANEL ── -->
+      <div id="disruptionCard" class="glass-card rounded-2xl p-6 animate-fade-up stagger-3">
+        <div class="text-xs font-semibold tracking-widest uppercase text-blue-400 mb-1">Live Simulation</div>
+        <h2 class="text-lg font-bold mb-2">Trigger Disruption</h2>
+        <p class="text-xs text-slate-500 leading-relaxed mb-5">
+          Simulate a real-world event. GigShield AI will automatically detect, verify, and process a claim.
+        </p>
+
+        <!-- Disruption buttons -->
+        <div class="grid grid-cols-3 gap-3 mb-5">
+          <!-- Rain -->
+          <button onclick="triggerDisruption('rain')"
+                  data-type="rain"
+                  disabled
+                  class="disruption-btn flex flex-col items-center gap-2 py-4 px-2 rounded-xl
+                         bg-blue-600/10 border border-blue-500/20 text-blue-300
+                         hover:bg-blue-600/20 hover:border-blue-400/40 hover:text-blue-200
+                         hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]
+                         disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none
+                         transition-all duration-200 font-semibold">
+            <span class="text-2xl">🌧️</span>
+            <span class="text-[11px] font-bold tracking-wide">Rain</span>
+            <span class="text-[9px] text-blue-400/60">&gt;50mm/hr</span>
+          </button>
+          <!-- Flood -->
+          <button onclick="triggerDisruption('flood')"
+                  data-type="flood"
+                  disabled
+                  class="disruption-btn flex flex-col items-center gap-2 py-4 px-2 rounded-xl
+                         bg-cyan-600/10 border border-cyan-500/20 text-cyan-300
+                         hover:bg-cyan-600/20 hover:border-cyan-400/40 hover:text-cyan-200
+                         hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(6,182,212,0.25)]
+                         disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none
+                         transition-all duration-200 font-semibold">
+            <span class="text-2xl">🌊</span>
+            <span class="text-[11px] font-bold tracking-wide">Flood</span>
+            <span class="text-[9px] text-cyan-400/60">Critical</span>
+          </button>
+          <!-- AQI -->
+          <button onclick="triggerDisruption('aqi')"
+                  data-type="aqi"
+                  disabled
+                  class="disruption-btn flex flex-col items-center gap-2 py-4 px-2 rounded-xl
+                         bg-amber-600/10 border border-amber-500/20 text-amber-300
+                         hover:bg-amber-600/20 hover:border-amber-400/40 hover:text-amber-200
+                         hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(245,158,11,0.25)]
+                         disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none
+                         transition-all duration-200 font-semibold">
+            <span class="text-2xl">🌫️</span>
+            <span class="text-[11px] font-bold tracking-wide">AQI</span>
+            <span class="text-[9px] text-amber-400/60">&gt;300</span>
+          </button>
+        </div>
+
+        <!-- Live feed ticker -->
+        <div class="rounded-xl bg-black/30 border border-white/[0.06] px-4 py-3">
+          <div class="flex items-center gap-2.5">
+            <span id="feedDot" class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 animate-pulse-slow shadow-[0_0_6px_#3b82f6]"></span>
+            <span id="feedText" class="text-[11px] text-slate-400 flex-1 truncate">Monitoring weather APIs…</span>
+            <span id="feedTime" class="text-[10px] text-slate-600 font-mono tabular-nums flex-shrink-0">--:--:--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CLAIM CARD ── -->
+      <div class="glass-card rounded-2xl p-6 flex flex-col animate-fade-up stagger-4">
+        <div class="text-xs font-semibold tracking-widest uppercase text-blue-400 mb-1">Claim Engine</div>
+        <h2 class="text-lg font-bold mb-4">Claim Status</h2>
+
+        <!-- Status indicator -->
+        <div class="flex flex-col items-center py-5 gap-3">
+          <div id="claimRing"
+               class="w-16 h-16 rounded-full border-2 border-white/10 bg-white/[0.04]
+                      flex items-center justify-center text-3xl transition-all duration-500">
+            <span id="claimIcon">⏳</span>
+          </div>
+          <div id="claimLabel" class="text-base font-bold text-white text-center transition-all duration-300">No Active Claim</div>
+          <div id="claimSublabel" class="text-[11px] text-slate-500 text-center leading-relaxed max-w-[200px] transition-all duration-300">
+            Activate coverage to begin monitoring
+          </div>
+        </div>
+
+        <!-- Payout row -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div id="payoutBox1" class="rounded-xl bg-white/[0.04] border border-white/[0.07] p-3 transition-all duration-500">
+            <div class="text-[10px] uppercase tracking-widest text-slate-600 mb-1">Payout</div>
+            <div id="payoutAmount" class="text-lg font-extrabold text-slate-400 transition-all duration-300">—</div>
+          </div>
+          <div id="payoutBox2" class="rounded-xl bg-white/[0.04] border border-white/[0.07] p-3 transition-all duration-500">
+            <div class="text-[10px] uppercase tracking-widest text-slate-600 mb-1">Method</div>
+            <div id="payoutMethod" class="text-lg font-extrabold text-slate-400 transition-all duration-300">—</div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div id="claimTimeline" class="space-y-0 overflow-hidden transition-all duration-500 max-h-0">
+          <!-- Steps injected via JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════════
+       TOAST
+  ════════════════════════════════════ -->
+  <div id="toast"
+       class="fixed bottom-6 right-6 z-50 max-w-xs px-5 py-3.5 rounded-2xl
+              glass-card text-sm font-semibold
+              translate-y-28 opacity-0
+              transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+              pointer-events-none select-none">
+  </div>
+
+  <!-- ════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════ -->
+  <script>
+    /* ── State ── */
+    const S = { activated: false, partnerName: '', city: '', premium: 0, busy: false };
+
+    /* ── Events data ── */
+    const EVENTS = {
+      rain:  { label: 'Heavy Rainfall', icon: '🌧️', reason: 'IMD oracle: Rainfall > 50mm/hr detected' },
+      flood: { label: 'Flood Alert',    icon: '🌊', reason: 'NDMA oracle: Flood warning issued' },
+      aqi:   { label: 'High AQI',       icon: '🌫️', reason: 'CPCB oracle: AQI index exceeds 300' },
+    };
+
+    /* ── Helpers ── */
+    const $  = id => document.getElementById(id);
+    const qs = sel => document.querySelector(sel);
+
+    function showToast(msg, type = 'info') {
+      const el = $('toast');
+      const colors = { success: 'text-emerald-400 border-emerald-500/30', error: 'text-red-400 border-red-500/30', info: 'text-blue-400 border-blue-500/30' };
+      el.textContent = msg;
+      el.className = `fixed bottom-6 right-6 z-50 max-w-xs px-5 py-3.5 rounded-2xl glass-card text-sm font-semibold transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${colors[type]}`;
+      el.classList.remove('translate-y-28', 'opacity-0');
+      el.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        el.classList.add('translate-y-28', 'opacity-0');
+        el.classList.remove('translate-y-0', 'opacity-100');
+      }, 3600);
+    }
+
+    /* ── Clock ── */
+    function tick() {
+      const n = new Date();
+      const t = [n.getHours(), n.getMinutes(), n.getSeconds()].map(x => String(x).padStart(2,'0')).join(':');
+      $('feedTime').textContent = t;
+    }
+    tick(); setInterval(tick, 1000);
+
+    /* ── Premium calc ── */
+    function calcPremium(city) {
+      const mod = { Mumbai:5, Delhi:4, Hyderabad:2, Bangalore:1, Chennai:3 }[city] ?? 2;
+      return 20 + ((new Date().getDate() + mod) % 11);
+    }
+
+    /* ── Feed update ── */
+    function setFeed(color, text) {
+      const dotClasses = { blue: 'bg-blue-500 shadow-[0_0_6px_#3b82f6]', red: 'bg-red-500 shadow-[0_0_6px_#ef4444]', green: 'bg-emerald-500 shadow-[0_0_6px_#22c55e]' };
+      $('feedDot').className = `w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse-slow ${dotClasses[color]}`;
+      $('feedText').textContent = text;
+    }
+
+    /* ════════════════════════════════
+       ACTIVATION
+    ════════════════════════════════ */
+    function activateInsurance() {
+      if (S.activated || S.busy) return;
+      const name = $('partnerName').value.trim();
+      const city = $('citySelect').value;
+      const note = $('activationNote');
+
+      if (!name) { note.textContent = '⚠️ Please enter your name.'; note.className = 'mt-3 text-[11px] text-center text-red-400 min-h-[1.2em]'; $('partnerName').focus(); return; }
+      if (!city) { note.textContent = '⚠️ Please select your city.'; note.className = 'mt-3 text-[11px] text-center text-red-400 min-h-[1.2em]'; $('citySelect').focus(); return; }
+
+      S.busy = true;
+      const btn = $('activateBtn');
+      btn.disabled = true;
+      $('btnContent').innerHTML = `<span class="dot-loader flex gap-1"><span class="w-1.5 h-1.5 rounded-full bg-white/80 inline-block"></span><span class="w-1.5 h-1.5 rounded-full bg-white/80 inline-block"></span><span class="w-1.5 h-1.5 rounded-full bg-white/80 inline-block"></span></span><span>Activating…</span>`;
+      note.textContent = '';
+
+      setTimeout(() => {
+        S.activated = true;
+        S.busy = false;
+        S.partnerName = name;
+        S.city = city;
+        S.premium = calcPremium(city);
+
+        /* Button → success */
+        btn.className = btn.className.replace('from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500', 'from-emerald-600 to-green-600 cursor-default');
+        $('btnContent').innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg><span>Active — ${name}</span>`;
+
+        /* Premium card */
+        $('premiumNum').textContent = S.premium;
+        $('premiumBadge').textContent = `✓ Active · ${city} Coverage`;
+        $('premiumBadge').className = 'mt-auto rounded-xl px-4 py-3 text-center text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 transition-all duration-500 animate-bounce-once';
+
+        /* Nav pill */
+        $('navDot').className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-slow shadow-[0_0_6px_#22c55e] transition-all duration-500';
+        $('navLabel').textContent = `Active · ${city}`;
+        $('navPill').className = $('navPill').className.replace('text-slate-400', 'text-emerald-400');
+
+        /* Note */
+        note.textContent = `Coverage active · Policy refreshes every Monday`;
+        note.className = 'mt-3 text-[11px] text-center text-emerald-500 min-h-[1.2em]';
+
+        /* Enable disruption buttons */
+        document.querySelectorAll('[data-type]').forEach(b => b.disabled = false);
+
+        /* Feed */
+        setFeed('blue', `Monitoring ${city} · all systems nominal`);
+        $('claimSublabel').textContent = 'Monitoring live. Trigger an event to simulate.';
+
+        showToast(`🛡️ Coverage activated for ${name} in ${city}`, 'success');
+      }, 1800);
+    }
+
+    /* ════════════════════════════════
+       DISRUPTION
+    ════════════════════════════════ */
+    function triggerDisruption(type) {
+      if (!S.activated || S.busy) { if (!S.activated) showToast('Activate coverage first!', 'error'); return; }
+      const ev = EVENTS[type];
+      S.busy = true;
+      document.querySelectorAll('[data-type]').forEach(b => b.disabled = true);
+      setFeed('red', `⚠️ ${ev.label} detected in ${S.city}!`);
+      showToast(`${ev.icon} ${ev.label} detected — processing claim…`, 'info');
+      processClaim(ev);
+    }
+
+    /* ════════════════════════════════
+       CLAIM PIPELINE
+    ════════════════════════════════ */
+    function processClaim(ev) {
+      const ring     = $('claimRing');
+      const icon     = $('claimIcon');
+      const label    = $('claimLabel');
+      const sublabel = $('claimSublabel');
+      const timeline = $('claimTimeline');
+
+      /* Spinner ring */
+      ring.className = 'w-16 h-16 rounded-full border-2 border-amber-400/60 bg-amber-500/10 flex items-center justify-center text-3xl transition-all duration-500';
+      icon.textContent = '⚙️';
+      label.textContent = 'Processing Claim…';
+      sublabel.textContent = `${ev.label} confirmed · Running parametric check`;
+      timeline.innerHTML = '';
+      timeline.style.maxHeight = '240px';
+      addStep('running', `${ev.icon} ${ev.label} signal received`);
+
+      const steps = [
+        [900,  [['done','signal received ✓'], ['running', 'Verifying oracle data source…']]],
+        [1800, [['done','Oracle data verified ✓'], ['running', 'Executing smart contract…']]],
+        [2800, [['done','Smart contract triggered ✓'], ['running', `Initiating ₹500 payout via UPI…`]]],
+        [3900, null], /* Final */
+      ];
+
+      steps.forEach(([delay, lines], i) => {
+        if (lines === null) {
+          setTimeout(finalizeClaim, delay);
+        } else {
+          setTimeout(() => {
+            clearRunning();
+            lines.forEach(([status, text]) => addStep(status, text));
+            if (i === 1) sublabel.textContent = ev.reason;
+            if (i === 2) sublabel.textContent = 'Crediting wallet…';
+          }, delay);
+        }
+      });
+    }
+
+    function finalizeClaim() {
+      clearRunning();
+      addStep('done', `₹500 credited · UPI Wallet ✓`);
+
+      $('claimRing').className = 'w-16 h-16 rounded-full border-2 border-emerald-400 bg-emerald-500/15 flex items-center justify-center text-3xl transition-all duration-500 shadow-glow-green animate-bounce-once';
+      $('claimIcon').textContent = '✅';
+      $('claimLabel').textContent = 'Claim Triggered ✅';
+      $('claimSublabel').textContent = '₹500 credited to your UPI wallet';
+
+      /* Payout boxes */
+      ['payoutBox1','payoutBox2'].forEach(id => {
+        $(id).className = $(id).className.replace('bg-white/[0.04] border-white/[0.07]','bg-emerald-500/10 border-emerald-500/25');
+      });
+      $('payoutAmount').textContent = '₹500';
+      $('payoutAmount').className = 'text-lg font-extrabold text-emerald-400 transition-all duration-300 animate-bounce-once';
+      $('payoutMethod').textContent = 'UPI';
+      $('payoutMethod').className = 'text-lg font-extrabold text-emerald-400 transition-all duration-300 animate-bounce-once';
+
+      setFeed('green', `✓ Claim settled · ₹500 disbursed to ${S.partnerName}`);
+      showToast('💰 ₹500 credited to your wallet!', 'success');
+
+      setTimeout(resetClaim, 8000);
+    }
+
+    /* ── Timeline helpers ── */
+    function clearRunning() {
+      document.querySelectorAll('.step-running').forEach(el => {
+        el.className = el.className.replace('step-running bg-amber-500 animate-pulse-slow','bg-emerald-500');
+      });
+    }
+    function addStep(status, text) {
+      const tl = $('claimTimeline');
+      const isRunning = status === 'running';
+      const dot = isRunning
+        ? 'step-running bg-amber-500 animate-pulse-slow shadow-[0_0_6px_#f59e0b]'
+        : 'bg-emerald-500 shadow-[0_0_4px_#22c55e]';
+      const el = document.createElement('div');
+      el.className = 'flex items-start gap-2.5 py-1.5 animate-fade-in';
+      el.innerHTML = `
+        <span class="w-2 h-2 rounded-full mt-1 flex-shrink-0 transition-all duration-300 ${dot}"></span>
+        <span class="text-[11px] text-slate-${isRunning ? '300' : '500'} leading-relaxed">${text}</span>`;
+      tl.appendChild(el);
+      tl.scrollTop = tl.scrollHeight;
+    }
+
+    /* ── Reset ── */
+    function resetClaim() {
+      S.busy = false;
+      $('claimRing').className = 'w-16 h-16 rounded-full border-2 border-white/10 bg-white/[0.04] flex items-center justify-center text-3xl transition-all duration-500';
+      $('claimIcon').textContent = '⏳';
+      $('claimLabel').textContent = 'No Active Claim';
+      $('claimSublabel').textContent = `Monitoring ${S.city} · Trigger another event`;
+      $('claimTimeline').innerHTML = '';
+      $('claimTimeline').style.maxHeight = '0';
+      ['payoutBox1','payoutBox2'].forEach(id => {
+        $(id).className = $(id).className.replace('bg-emerald-500/10 border-emerald-500/25','bg-white/[0.04] border-white/[0.07]');
+      });
+      $('payoutAmount').textContent = '—';
+      $('payoutAmount').className = 'text-lg font-extrabold text-slate-400 transition-all duration-300';
+      $('payoutMethod').textContent = '—';
+      $('payoutMethod').className = 'text-lg font-extrabold text-slate-400 transition-all duration-300';
+      document.querySelectorAll('[data-type]').forEach(b => b.disabled = false);
+      setFeed('blue', `Monitoring ${S.city} · ready for next event`);
+      showToast('🔄 System reset. Ready for next simulation.', 'info');
+    }
+
+    /* ── Enter key ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      $('partnerName')?.addEventListener('keydown', e => { if (e.key === 'Enter') activateInsurance(); });
+    });
+  </script>
+</body>
+</html>
